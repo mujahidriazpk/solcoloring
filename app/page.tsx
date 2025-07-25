@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { categories } from '@/app/data/categories';
 
 export default function HomePage() {
@@ -9,17 +8,28 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center w-full">
       {/* Hero Section */}
-      <section className="w-full bg-[#1B0B35] text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1B0B35]/80 to-[#1B0B35] z-10"></div>
-        <Image
-          src="/banner-ai-art.jpg"
-          alt="AI Art Creation"
-          width={1920}
-          height={1080}
-          className="w-full object-cover absolute inset-0"
-          priority
-        />
+      <section className="w-full bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-center relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full animate-float"></div>
+          <div className="absolute top-32 right-20 w-16 h-16 bg-pink-200 rounded-full animate-bounce"></div>
+          <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-blue-200 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-32 right-1/3 w-14 h-14 bg-purple-200 rounded-full animate-float"></div>
+        </div>
+        
         <div className="container-custom relative z-20 py-20 sm:py-28">
+          {/* AI Art Icon */}
+          <div className="mb-8 flex justify-center">
+            <div className="relative">
+              <div className="w-24 h-24 bg-gradient-to-r from-pink-400 to-purple-600 rounded-2xl flex items-center justify-center text-4xl animate-bounce">
+                🎨
+              </div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-lg animate-spin">
+                ✨
+              </div>
+            </div>
+          </div>
+          
           <h1 className="heading-1 text-white mb-6 max-w-4xl mx-auto">
             Create Beautiful Coloring Pages with AI
           </h1>
@@ -27,7 +37,7 @@ export default function HomePage() {
             Transform your ideas into stunning coloring pages using artificial intelligence
           </p>
           <div className="flex justify-center gap-4">
-            <Link href="/create" className="button-primary">
+            <Link href="/create" className="button-primary bg-white text-indigo-600 hover:bg-gray-100">
               Start Creating
             </Link>
             <Link href="/categories" className="button-secondary bg-white/10 text-white border-white/20 hover:bg-white/20">
