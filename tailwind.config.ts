@@ -68,6 +68,7 @@ const config: Config = {
         'slide-in': 'slide-in 0.5s ease-out',
         'slide-up': 'slide-up 0.5s ease-out',
         'bounce-slow': 'bounce 3s linear infinite',
+        'float': 'float 6s ease-in-out infinite',
       },
       keyframes: {
         'fade-in': {
@@ -81,6 +82,10 @@ const config: Config = {
         'slide-up': {
           '0%': { transform: 'translateY(100%)' },
           '100%': { transform: 'translateY(0)' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-20px)' },
         },
       },
       boxShadow: {
