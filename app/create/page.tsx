@@ -6,7 +6,8 @@ import { categories } from '@/app/data/categories';
 import type { Category } from '@/app/data/categories';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaMagic, FaUpload, FaImage, FaTimes } from 'react-icons/fa';
+import { FaMagic, FaUpload, FaImage, FaTimes, FaSave, FaCheck } from 'react-icons/fa';
+import { useUser } from '@/app/contexts/UserContext';
 
 // Component that uses useSearchParams - must be wrapped in Suspense
 function CreatePageContent() {
@@ -14,6 +15,8 @@ function CreatePageContent() {
   const categoryId = searchParams.get('category');
   const subcategoryId = searchParams.get('subcategory');
   const itemId = searchParams.get('item');
+  
+  const { saveCreation, error: userError, clearError } = useUser();
 
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +26,8 @@ function CreatePageContent() {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [generationMetadata, setGenerationMetadata] = useState<any>(null);
 
   useEffect(() => {
     if (categoryId && subcategoryId && itemId) {
@@ -41,6 +46,8 @@ function CreatePageContent() {
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setIsSaved(false);
+    clearError();
 
     try {
       const response = await fetch('/api/generate', {
@@ -48,7 +55,12 @@ function CreatePageContent() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ 
+          prompt,
+          categoryId,
+          subcategoryId,
+          itemId
+        }),
       });
 
       if (!response.ok) {
@@ -57,10 +69,27 @@ function CreatePageContent() {
 
       const data = await response.json();
       setResult(data.imageUrl);
+      setGenerationMetadata(data.metadata);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveCreation = () => {
+    if (result && prompt) {
+      try {
+        saveCreation({
+          prompt: generationMetadata?.originalPrompt || prompt,
+          imageUrl: result,
+          metadata: generationMetadata
+        });
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 3000); // Reset after 3 seconds
+      } catch (err) {
+        setError('Failed to save creation');
+      }
     }
   };
 
@@ -92,11 +121,20 @@ function CreatePageContent() {
       <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Create Your Coloring Page</h1>
 
-        {error && (
+        {(error || userError) && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 flex items-center">
               <FaTimes className="mr-2" />
-              {error}
+              {error || userError}
+            </p>
+          </div>
+        )}
+
+        {isSaved && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-600 flex items-center">
+              <FaCheck className="mr-2" />
+              Creation saved to your profile!
             </p>
           </div>
         )}
@@ -265,6 +303,27 @@ function CreatePageContent() {
               </div>
               <div className="mt-4 flex justify-end space-x-4">
                 <button
+                  onClick={handleSaveCreation}
+                  disabled={isSaved}
+                  className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                    isSaved 
+                      ? 'bg-green-600 text-white'
+                      : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
+                  }`}
+                >
+                  {isSaved ? (
+                    <>
+                      <FaCheck className="h-5 w-5 mr-2" />
+                      Saved
+                    </>
+                  ) : (
+                    <>
+                      <FaSave className="h-5 w-5 mr-2" />
+                      Save to Profile
+                    </>
+                  )}
+                </button>
+                <button
                   onClick={() => {
                     const link = document.createElement('a');
                     link.href = result || uploadedImageUrl || '';
@@ -274,7 +333,7 @@ function CreatePageContent() {
                   className="flex items-center px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
                   Download
                 </button>

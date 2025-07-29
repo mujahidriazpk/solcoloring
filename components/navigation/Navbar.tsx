@@ -1,6 +1,22 @@
+'use client';
+
 import Link from 'next/link';
+import { useUser } from '@/app/contexts/UserContext';
+import { FaUser } from 'react-icons/fa';
 
 export default function Navbar() {
+  let profile = null;
+  let creations: any[] = [];
+
+  try {
+    const userContext = useUser();
+    profile = userContext.profile;
+    creations = userContext.creations;
+  } catch (error) {
+    // Context not available yet, use defaults
+    console.log('UserContext not available yet');
+  }
+
   return (
     <nav className="w-full bg-white border-b border-gray-200">
       <div className="container-custom">
@@ -34,7 +50,18 @@ export default function Navbar() {
             </Link>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {/* User Profile Info */}
+            <Link href="/profile" className="hidden sm:flex items-center space-x-2 text-gray-700 hover:text-primary-600 transition-colors">
+              <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm">
+                <FaUser />
+              </div>
+              <div className="text-sm">
+                <div className="font-medium">{profile?.name || 'Anonymous'}</div>
+                <div className="text-xs text-gray-500">{creations.length} creations</div>
+              </div>
+            </Link>
+            
             <button className="button-primary">
               Connect Wallet
             </button>
